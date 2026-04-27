@@ -1,0 +1,11 @@
+# env
+.env
+
+# binários
+*.exe
+
+# IDE
+.vscode/
+
+# logs
+*.log

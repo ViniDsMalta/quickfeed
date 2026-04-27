@@ -7,6 +7,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
+	"quickfeed/auth"
 	"quickfeed/database"
 )
 
@@ -56,5 +57,15 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("sucessfull login"))
+	token, err := auth.GenerateToken(req.Email)
+	if err != nil {
+		http.Error(w, "error generating token", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	json.NewEncoder(w).Encode(map[string]string{
+		"token": token,
+	})
 }
