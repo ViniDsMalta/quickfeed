@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
 	"strings"
 
@@ -13,26 +14,30 @@ func JWTAuth(next http.HandlerFunc) http.HandlerFunc {
 		header := r.Header.Get("Authorization")
 
 		if header == "" {
-			http.Error(w, "whithout a token", http.StatusUnauthorized)
+			http.Error(w, "Token ausente", http.StatusUnauthorized)
 			return
 		}
 
 		parts := strings.Split(header, " ")
 
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			http.Error(w, "invalid", http.StatusUnauthorized)
+			http.Error(w, "Formato inválido", http.StatusUnauthorized)
 			return
 		}
 
-		token := parts[1]
+		tokenString := parts[1]
 
-		_, err := auth.ValidateToken(token)
-
+		_, claims, err := auth.ValidateToken(tokenString)
 		if err != nil {
-			http.Error(w, "invalid token", http.StatusUnauthorized)
+			http.Error(w, "Token inválido", http.StatusUnauthorized)
 			return
 		}
 
-		next(w, r)
+		email := claims["email"].(string)
+
+		// salvar no contexto
+		ctx := context.WithValue(r.Context(), "userEmail", email)
+
+		next(w, r.WithContext(ctx))
 	}
 }

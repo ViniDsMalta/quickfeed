@@ -19,8 +19,19 @@ func GenerateToken(email string) (string, error) {
 	return token.SignedString(secret)
 }
 
-func ValidateToken(tokenString string) (*jwt.Token, error) {
-	return jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
+func ValidateToken(tokenString string) (*jwt.Token, jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
 		return secret, nil
 	})
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		return nil, nil, err
+	}
+
+	return token, claims, nil
 }

@@ -39,6 +39,7 @@ func main() {
 	http.HandleFunc("/register", handlers.RegisterHandler)
 	http.HandleFunc("/login", handlers.LoginHandler)
 	http.HandleFunc("/profile", middleware.JWTAuth(handlers.ProfileHandler))
+	http.HandleFunc("/companies", middleware.JWTAuth(handlers.CreateCompanyHandler))
 	log.Println("running in http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
