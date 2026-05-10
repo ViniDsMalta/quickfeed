@@ -39,7 +39,20 @@ func main() {
 	http.HandleFunc("/register", handlers.RegisterHandler)
 	http.HandleFunc("/login", handlers.LoginHandler)
 	http.HandleFunc("/profile", middleware.JWTAuth(handlers.ProfileHandler))
-	http.HandleFunc("/companies", middleware.JWTAuth(handlers.CreateCompanyHandler))
+	http.HandleFunc("/companies", middleware.JWTAuth(func(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == http.MethodPost {
+		handlers.CreateCompanyHandler(w, r)
+		return
+	}
+
+	if r.Method == http.MethodGet {
+		handlers.ListCompaniesHandler(w, r)
+		return
+	}
+
+	http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+}))
 	log.Println("running in http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

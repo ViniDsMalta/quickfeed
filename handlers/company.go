@@ -11,6 +11,11 @@ import (
 type CreateCompanyRequest struct {
 	Name string `json:"name"`
 }
+type Company struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+	Slug string `json:"slug"`
+}
 
 func CreateCompanyHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -57,4 +62,56 @@ if err != nil {
 	}
 
 	w.Write([]byte("company created"))
+}
+func ListCompaniesHandler(w http.ResponseWriter, r *http.Request) {
+
+	email := r.Context().Value("userEmail").(string)
+
+	var ownerID int
+
+	err := database.DB.QueryRow(
+		"SELECT id FROM users WHERE email=$1",
+		email,
+	).Scan(&ownerID)
+
+	if err != nil {
+		http.Error(w, "user not found", http.StatusInternalServerError)
+		return
+	}
+
+	rows, err := database.DB.Query(
+		"SELECT id, name, slug FROM companies WHERE owner_id=$1",
+		ownerID,
+	)
+
+	if err != nil {
+		http.Error(w, "database error", http.StatusInternalServerError)
+		return
+	}
+
+	defer rows.Close()
+
+	var companies []Company
+
+	for rows.Next() {
+
+		var company Company
+
+		err := rows.Scan(
+			&company.ID,
+			&company.Name,
+			&company.Slug,
+		)
+
+		if err != nil {
+			http.Error(w, "scan error", http.StatusInternalServerError)
+			return
+		}
+
+		companies = append(companies, company)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	json.NewEncoder(w).Encode(companies)
 }
