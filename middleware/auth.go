@@ -8,8 +8,9 @@ import (
 	"quickfeed/auth"
 )
 
-func JWTAuth(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func JWTAuth(next http.Handler) http.Handler {
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		header := r.Header.Get("Authorization")
 
@@ -36,8 +37,15 @@ func JWTAuth(next http.HandlerFunc) http.HandlerFunc {
 		email := claims["email"].(string)
 
 		// salvar no contexto
-		ctx := context.WithValue(r.Context(), "userEmail", email)
+		ctx := context.WithValue(
+			r.Context(),
+			"userEmail",
+			email,
+		)
 
-		next(w, r.WithContext(ctx))
-	}
+		next.ServeHTTP(
+			w,
+			r.WithContext(ctx),
+		)
+	})
 }

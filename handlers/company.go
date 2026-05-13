@@ -1,11 +1,13 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
+	"quickfeed/database"
 	"strings"
 
-	"quickfeed/database"
+	"github.com/go-chi/chi/v5"
 )
 
 type CreateCompanyRequest struct {
@@ -114,4 +116,37 @@ func ListCompaniesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	json.NewEncoder(w).Encode(companies)
+}
+func GetCompanyBySlugHandler(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+
+	slug := chi.URLParam(r, "slug")
+
+	var company Company
+
+	err := database.DB.QueryRow(
+		"SELECT id, name, slug FROM companies WHERE slug=$1",
+		slug,
+	).Scan(
+		&company.ID,
+		&company.Name,
+		&company.Slug,
+	)
+
+	if err != nil {
+
+		if err == sql.ErrNoRows {
+			http.Error(w, "company not found", http.StatusNotFound)
+			return
+		}
+
+		http.Error(w, "database error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	json.NewEncoder(w).Encode(company)
 }

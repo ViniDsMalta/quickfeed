@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 
@@ -13,10 +14,26 @@ import (
 	"quickfeed/middleware"
 )
 
+func enableCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+
+		if r.Method == "OPTIONS" {
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
+
 	err := godotenv.Load()
 	if err != nil {
-	log.Println(".env not found, using system variables")
+		log.Println(".env not found, using system variables")
 	}
 
 	connStr := "host=localhost port=5433 user=postgres password=123456 dbname=quickfeed sslmode=disable"
@@ -35,24 +52,35 @@ func main() {
 
 	log.Println("db succesfull connected")
 
-	http.HandleFunc("/health", handlers.HealthHandler)
-	http.HandleFunc("/register", handlers.RegisterHandler)
-	http.HandleFunc("/login", handlers.LoginHandler)
-	http.HandleFunc("/profile", middleware.JWTAuth(handlers.ProfileHandler))
-	http.HandleFunc("/companies", middleware.JWTAuth(func(w http.ResponseWriter, r *http.Request) {
+	
+	r := chi.NewRouter()
 
-	if r.Method == http.MethodPost {
-		handlers.CreateCompanyHandler(w, r)
-		return
-	}
+	
+	r.Get("/health", handlers.HealthHandler)
+	r.Get("/{slug}", handlers.GetCompanyBySlugHandler)
 
-	if r.Method == http.MethodGet {
-		handlers.ListCompaniesHandler(w, r)
-		return
-	}
+	r.Post("/register", handlers.RegisterHandler)
+	r.Post("/login", handlers.LoginHandler)
 
-	http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-}))
+	
+	r.With(middleware.JWTAuth).Get(
+		"/profile",
+		handlers.ProfileHandler,
+	)
+
+	r.With(middleware.JWTAuth).Route("/companies", func(r chi.Router) {
+
+		r.Post("/", handlers.CreateCompanyHandler)
+
+		r.Get("/", handlers.ListCompaniesHandler)
+	})
+
 	log.Println("running in http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+
+	log.Fatal(
+		http.ListenAndServe(
+			":8080",
+			enableCORS(r),
+		),
+	)
 }
