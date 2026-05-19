@@ -57,7 +57,6 @@ func main() {
 
 	
 	r.Get("/health", handlers.HealthHandler)
-	r.Get("/{slug}", handlers.GetCompanyBySlugHandler)
 
 	r.Post("/register", handlers.RegisterHandler)
 	r.Post("/login", handlers.LoginHandler)
@@ -68,12 +67,35 @@ func main() {
 		handlers.ProfileHandler,
 	)
 
-	r.With(middleware.JWTAuth).Route("/companies", func(r chi.Router) {
+	r.Route("/companies", func(r chi.Router) {
 
-		r.Post("/", handlers.CreateCompanyHandler)
+	r.With(middleware.JWTAuth).Get(
+	"/{slug}/feedbacks",
+	handlers.ListFeedbacksHandler,
+)
 
-		r.Get("/", handlers.ListCompaniesHandler)
-	})
+	
+	r.With(middleware.JWTAuth).Post(
+		"/",
+		handlers.CreateCompanyHandler,
+	)
+
+	r.With(middleware.JWTAuth).Get(
+		"/",
+		handlers.ListCompaniesHandler,
+	)
+
+	
+	r.Get(
+		"/{slug}",
+		handlers.GetCompanyBySlugHandler,
+	)
+
+	r.Post(
+		"/{slug}/feedback",
+		handlers.CreateFeedbackHandler,
+	)
+})
 
 	log.Println("running in http://localhost:8080")
 

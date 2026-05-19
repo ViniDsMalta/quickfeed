@@ -15,14 +15,14 @@ func JWTAuth(next http.Handler) http.Handler {
 		header := r.Header.Get("Authorization")
 
 		if header == "" {
-			http.Error(w, "Token ausente", http.StatusUnauthorized)
+			http.Error(w, "no token", http.StatusUnauthorized)
 			return
 		}
 
 		parts := strings.Split(header, " ")
 
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			http.Error(w, "Formato inválido", http.StatusUnauthorized)
+			http.Error(w, "invalid format", http.StatusUnauthorized)
 			return
 		}
 
@@ -30,13 +30,13 @@ func JWTAuth(next http.Handler) http.Handler {
 
 		_, claims, err := auth.ValidateToken(tokenString)
 		if err != nil {
-			http.Error(w, "Token inválido", http.StatusUnauthorized)
+			http.Error(w, "invalid token", http.StatusUnauthorized)
 			return
 		}
 
 		email := claims["email"].(string)
 
-		// salvar no contexto
+	
 		ctx := context.WithValue(
 			r.Context(),
 			"userEmail",
