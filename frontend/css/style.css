@@ -1,0 +1,24 @@
+
+body {
+  font-family: Arial;
+  background: #111;
+  color: white;
+}
+
+.container {
+  width: 400px;
+  margin: 40px auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+input,
+button {
+  padding: 10px;
+}
+
+button {
+  cursor: pointer;
+}
