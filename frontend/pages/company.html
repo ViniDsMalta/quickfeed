@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Company</title>
+
+  <link rel="stylesheet" href="../css/style.css">
+
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1 id="companyName">
+      Loading...
+    </h1>
+
+    <p id="companySlug"></p>
+
+    <textarea
+      id="feedbackMessage"
+      placeholder="Write your feedback"
+    ></textarea>
+
+    <button onclick="sendFeedback()">
+      Send Feedback
+    </button>
+
+    <pre id="output"></pre>
+
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/company.js"></script>
+
+</body>
+</html>
