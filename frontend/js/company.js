@@ -58,9 +58,23 @@ async function sendFeedback() {
 }
 
 function show(text) {
-
-  document.getElementById("output")
-    .textContent = text
+  const output = document.getElementById("output");
+  output.textContent = text;
+  output.className = ""; // clear previous alert styles
+  
+  const textLower = text.toLowerCase();
+  if (
+    textLower.includes("fail") ||
+    textLower.includes("error") ||
+    textLower.includes("missing") ||
+    textLower.includes("not found") ||
+    textLower.includes("invalid") ||
+    textLower.includes("empty")
+  ) {
+    output.classList.add("alert-error");
+  } else {
+    output.classList.add("alert-success");
+  }
 }
 
 loadCompany()
