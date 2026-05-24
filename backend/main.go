@@ -9,6 +9,7 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 
+	"os"
 	"quickfeed/database"
 	"quickfeed/handlers"
 	"quickfeed/middleware"
@@ -36,7 +37,11 @@ func main() {
 		log.Println(".env not found, using system variables")
 	}
 
-	connStr := "host=localhost port=5433 user=postgres password=123456 dbname=quickfeed sslmode=disable"
+	connStr := os.Getenv("DATABASE_URL")
+
+	if connStr == "" {
+	log.Fatal("DATABASE_URL missing")
+}
 
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
@@ -97,7 +102,7 @@ func main() {
 	)
 })
 
-	log.Println("running in http://localhost:8080")
+	log.Println("running")
 
 	log.Fatal(
 		http.ListenAndServe(
