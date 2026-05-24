@@ -55,6 +55,16 @@ func main() {
 
 	database.DB = db
 
+		sqlBytes, err := os.ReadFile("sql/init.sql")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.Exec(string(sqlBytes))
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	log.Println("db succesfull connected")
 
 	
