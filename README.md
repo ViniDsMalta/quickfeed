@@ -87,6 +87,12 @@ http://[IP da EC2]
 
 O projeto foi publicado em uma instância AWS EC2 utilizando Docker Compose, Nginx e PostgreSQL em containers Docker.
 
+## Variáveis de Ambiente
+
+As variáveis presentes no `docker-compose.yml` são apenas exemplos utilizados para desenvolvimento e demonstração do projeto.
+
+Para ambientes de produção, recomenda-se substituir os valores por credenciais próprias e armazená-los em arquivos `.env` ou serviços de gerenciamento de segredos.
+
 ## Rotas da API
 
 ### Autenticação
